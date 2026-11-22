@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b18">
+  <meta name="description" content="Neon Dodge: a free arcade survival game. Dodge incoming hazards, collect energy, and beat your high score.">
+  <title>NEON DODGE · Arcade Survival</title>
+  <style>
+    :root{color-scheme:dark;--cyan:#6bf8ff;--pink:#ff4fa0;--gold:#ffe58a;--ink:#090c1a;--muted:#8795b8}
+    *{box-sizing:border-box}html,body{min-height:100%;margin:0}
+    body{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#f4f8ff;background:radial-gradient(ellipse at 50% 10%,#192246 0%,#0b1025 34%,#050711 78%);overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(90deg,transparent 0%,#59e7ff08 50%,transparent 100%),repeating-linear-gradient(0deg,#ffffff08 0px,#ffffff08 1px,transparent 1px,transparent 5px)}
+    .app{max-width:840px;margin:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 14px 24px}
+    header{width:min(94vw,480px);display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+    .eyebrow{font-size:10px;color:var(--cyan);letter-spacing:3px;font-weight:800;line-height:1.6}
+    h1{font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;letter-spacing:3px;font-size:clamp(32px,8vw,46px);margin:0;line-height:.97;font-weight:900;color:#f9fbff;text-shadow:0 0 30px #5b84ff65}
+    h1 span{color:var(--cyan)}
+    .top-right{text-align:right;font-size:10px;letter-spacing:2px;color:#96a3c5;padding-bottom:3px;line-height:1.6}
+    .top-right b{color:var(--pink)}
+    .hud{width:min(94vw,480px);display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .metric{background:#0f1730d9;border:1px solid #334268;border-radius:11px;padding:9px 12px;min-width:0}
+    .metric label{display:block;color:#8397ba;font-size:9px;letter-spacing:2px;margin-bottom:3px}
+    .metric strong{display:block;font:800 19px/1.1 ui-monospace,monospace;color:#fbfdff;font-variant-numeric:tabular-nums}
+    .metric:last-child strong{color:#ff83b6}
+    .frame{width:min(94vw,480px,calc(78dvh * .667));aspect-ratio:2/3;position:relative;border:1px solid #566d9a;border-radius:16px;overflow:hidden;box-shadow:0 0 0 5px #10182b,0 32px 80px #0008,0 0 45px #355ee122;background:#070d20;touch-action:none;user-select:none}
+    canvas{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+    .frame:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 44px #020516b3;z-index:2}
+    .overlay{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(180deg,#05091bce,#090b1fdc);text-align:center;transition:opacity .18s}
+    .overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .overlay-inner{width:100%;max-width:350px}
+    .swoosh{font-family:Impact,'Arial Black',sans-serif;font-size:clamp(52px,14vw,78px);font-style:italic;letter-spacing:3px;line-height:.9;text-shadow:4px 4px 0 #ef2e83,0 0 45px #36d7ff70;margin:14px 0 16px;transform:skewY(-4deg)}
+    .swoosh span{color:var(--cyan)}
+    .overlay h2{font:900 33px/1.1 Impact,'Arial Narrow Bold',sans-serif;letter-spacing:3px;margin:0 0 12px}
+    .overline{color:#64edfb;font-size:10px;letter-spacing:4px}
+    .description{font-size:12px;line-height:1.85;color:#b8c7e8;margin:0 auto 18px;max-width:285px}
+    .description b{color:white}
+    .final-score{font-size:41px;font-weight:900;color:var(--cyan);margin:12px 0 0;font-variant-numeric:tabular-nums;text-shadow:0 0 20px #38e0ffa0}
+    .new-record{min-height:23px;color:var(--gold);font-size:12px;letter-spacing:2px}
+    .primary{appearance:none;border:0;border-radius:9px;padding:15px 26px;min-width:195px;cursor:pointer;color:#09121d;font:900 13px/1 ui-monospace,monospace;letter-spacing:2px;background:linear-gradient(110deg,#6af9ff,#77a9ff);box-shadow:0 6px 0 #31678f,0 0 26px #67e5ff5a;transition:transform .1s,box-shadow .1s}
+    .primary:active{transform:translateY(4px);box-shadow:0 2px 0 #31678f}
+    .controls{margin-top:20px;color:#8298b9;font-size:10px;line-height:1.9;letter-spacing:.5px}
+    .below{width:min(94vw,480px);display:flex;align-items:center;justify-content:space-between;gap:10px;color:#96a6c9;font-size:10px;line-height:1.4}
+    .below span{color:#72f1fb}
+    .below button{background:#111c36;border:1px solid #34466f;border-radius:7px;color:#c7d8f7;font:700 10px ui-monospace,monospace;letter-spacing:1px;padding:8px 11px;cursor:pointer}
+    .below button:focus-visible,.primary:focus-visible{outline:3px solid #ffe58a;outline-offset:4px}
+    footer{font-size:9px;color:#62718e;letter-spacing:2px;text-align:center;margin-top:4px}
+    @media(max-height:730px){.app{padding-top:10px;gap:8px}.metric{padding:6px 10px}.metric strong{font-size:16px}.frame{width:min(94vw,440px,calc(69dvh * .667))}.controls{margin-top:10px}}
+    @media(prefers-reduced-motion:reduce){.overlay,.primary{transition:none}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <header><div><div class="eyebrow">ARCADE / 001</div><h1>NEON <span>DODGE</span></h1></div><div class="top-right">SURVIVE THE<br><b>NEON STORM</b></div></header>
+  <section class="hud" aria-label="Game stats">
+    <div class="metric"><label>SCORE</label><strong id="score">00000</strong></div>
+    <div class="metric"><label>BEST</label><strong id="best">00000</strong></div>
+    <div class="metric"><label>SHIELDS</label><strong id="lives">◆ ◆ ◆</strong></div>
+  </section>
+  <div class="frame" id="frame">
+    <canvas id="game" width="480" height="720" aria-label="Arcade game: move left and right to dodge incoming hazards and collect glowing stars"></canvas>
+    <div class="overlay" id="overlay">
+      <div class="overlay-inner">
+        <div class="overline" id="overlayLabel">READY, PILOT?</div>
+        <div class="swoosh" id="overlayMark">DOD<span>GE</span></div>
+        <h2 id="overlayTitle">BEAT THE STORM</h2>
+        <p class="description" id="overlayDescription">Dodge the <b>pink hazards</b>. Collect <b>gold energy</b> for bonus points. Stay alive as the storm gets faster.</p>
+        <div class="final-score" id="finalScore" hidden>00000</div>
+        <div class="new-record" id="record" hidden></div>
+        <button class="primary" id="startBtn" type="button">START GAME →</button>
+        <div class="controls">← → / A D TO MOVE<br>DRAG OR TOUCH ON MOBILE<br>P OR SPACE TO PAUSE</div>
+      </div>
+    </div>
+  </div>
+  <div class="below"><div><span>●</span> GOLD = BONUS &nbsp; <span>●</span> PINK = DANGER</div><div><button id="pauseBtn" type="button">PAUSE</button> <button id="soundBtn" type="button" aria-label="Toggle sound">SOUND OFF</button></div></div>
+  <footer>BUILT FOR THE HIGH SCORE</footer>
+</main>
+<script>
+(()=>{'use strict';
+  const W=480,H=720,canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),frame=document.getElementById('frame');
+  const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),livesEl=document.getElementById('lives');
+  const overlay=document.getElementById('overlay'),overlayLabel=document.getElementById('overlayLabel'),overlayMark=document.getElementById('overlayMark'),overlayTitle=document.getElementById('overlayTitle'),overlayDescription=document.getElementById('overlayDescription'),finalScore=document.getElementById('finalScore'),record=document.getElementById('record'),startBtn=document.getElementById('startBtn'),pauseBtn=document.getElementById('pauseBtn'),soundBtn=document.getElementById('soundBtn');
+  const storeKey='neon-dodge-best-v1';
+  const clamp=(n,a,b)=>Math.max(a,Math.min(b,n)),rand=(a,b)=>a+Math.random()*(b-a),fmt=n=>String(Math.floor(n)).padStart(5,'0');
+  let best=0;try{best=Number(localStorage.getItem(storeKey))||0}catch{}bestEl.textContent=fmt(best);
+  let mode='ready',last=0,time=0,score=0,lives=3,level=1,spawnTimer=0,pickupTimer=0,shake=0,flash=0;
+  let objects=[],particles=[],stars=[],pointerX=null,activePointer=null,muted=true,audio=null;
+  const keys=new Set(),player={x:W/2,y:H-96,r:18,vx:0,invuln:0,tilt:0};
+  function resize(){const dpr=Math.min(window.devicePixelRatio||1,2);canvas.width=W*dpr;canvas.height=H*dpr;ctx.setTransform(dpr,0,0,dpr,0,0)}
+  resize();window.addEventListener('resize',resize);
+  function seedStars(){stars=Array.from({length:90},()=>({x:rand(0,W),y:rand(0,H),r:rand(.5,1.8),v:rand(14,65),alpha:rand(.15,.7)}))}seedStars();
+  function tone(hz,duration=.09,type='sine',volume=.035){if(muted)return;try{audio??=new (window.AudioContext||window.webkitAudioContext)();audio.resume();const osc=audio.createOscillator(),gain=audio.createGain(),now=audio.currentTime;osc.type=type;osc.frequency.setValueAtTime(hz,now);gain.gain.setValueAtTime(volume,now);gain.gain.exponentialRampToValueAtTime(.0001,now+duration);osc.connect(gain).connect(audio.destination);osc.start(now);osc.stop(now+duration)}catch{}}
+  soundBtn.addEventListener('click',()=>{muted=!muted;soundBtn.textContent=muted?'SOUND OFF':'SOUND ON';soundBtn.setAttribute('aria-label',muted?'Enable sound':'Mute sound');if(!muted)tone(620)});
+  function burst(x,y,color,count=14,power=170){for(let i=0;i<count;i++){const a=rand(0,Math.PI*2),v=rand(power*.25,power);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:rand(.25,.65),max:.65,size:rand(2,5),color})}if(particles.length>250)particles.splice(0,particles.length-250)}
+  function hud(){scoreEl.textContent=fmt(score);livesEl.textContent='◆ '.repeat(lives).trim()||'—'}
+  function showOverlay(kind){overlay.classList.remove('hidden');finalScore.hidden=true;record.hidden=true;overlayMark.hidden=false;overlayDescription.hidden=false;
+    if(kind==='pause'){overlayLabel.textContent='TAKE A BREATHER';overlayMark.innerHTML='PAU<span>SE</span>';overlayTitle.textContent='STORM ON HOLD';overlayDescription.innerHTML='Your ship is safe. Jump back in when you’re ready.';startBtn.textContent='RESUME →'}
+    else if(kind==='over'){overlayLabel.textContent='SIGNAL LOST';overlayMark.hidden=true;overlayTitle.textContent='GAME OVER';overlayDescription.hidden=true;finalScore.hidden=false;finalScore.textContent=fmt(score);record.hidden=false;const isRecord=score>best;if(isRecord){best=Math.floor(score);try{localStorage.setItem(storeKey,String(best))}catch{}bestEl.textContent=fmt(best)}record.textContent=isRecord?'★ NEW HIGH SCORE ★':'BEST: '+fmt(best);startBtn.textContent='TRY AGAIN →'}
+    else{overlayLabel.textContent='READY, PILOT?';overlayMark.innerHTML='DOD<span>GE</span>';overlayTitle.textContent='BEAT THE STORM';overlayDescription.innerHTML='Dodge the <b>pink hazards</b>. Collect <b>gold energy</b> for bonus points. Stay alive as the storm gets faster.';startBtn.textContent='START GAME →'}}
+  function start(){time=0;score=0;lives=3;level=1;spawnTimer=.5;pickupTimer=2.1;shake=0;flash=0;objects=[];particles=[];player.x=W/2;player.vx=0;player.tilt=0;player.invuln=1.6;pointerX=null;activePointer=null;keys.clear();hud();mode='playing';overlay.classList.add('hidden');pauseBtn.textContent='PAUSE';tone(520,.11);tone(780,.14)}
+  function togglePause(){if(mode==='playing'){mode='pause';pauseBtn.textContent='RESUME';showOverlay('pause')}else if(mode==='pause'){mode='playing';pauseBtn.textContent='PAUSE';overlay.classList.add('hidden');last=performance.now()}}
+  startBtn.addEventListener('click',()=>{if(mode==='pause')togglePause();else start()});pauseBtn.addEventListener('click',()=>{if(mode==='playing'||mode==='pause')togglePause()});
+  window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright',' ','arrowup','a','d','p'].includes(k))e.preventDefault();if(k==='p'||k===' '){if(!e.repeat&&mode!=='ready'&&mode!=='over')togglePause();return}if(k==='arrowleft'||k==='a'||k==='arrowright'||k==='d'){keys.add(k);pointerX=null}});
+  window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));window.addEventListener('blur',()=>{keys.clear();if(mode==='playing')togglePause()});
+  function readPointer(e){const rect=canvas.getBoundingClientRect();return clamp((e.clientX-rect.left)/rect.width*W,24,W-24)}
+  frame.addEventListener('pointerdown',e=>{if(mode!=='playing'||!e.target.closest('canvas'))return;activePointer=e.pointerId;pointerX=readPointer(e);try{canvas.setPointerCapture(e.pointerId)}catch{}});
+  frame.addEventListener('pointermove',e=>{if(mode==='playing'&&activePointer===e.pointerId)pointerX=readPointer(e)});
+  function release(e){if(activePointer===e.pointerId){activePointer=null;pointerX=null}}frame.addEventListener('pointerup',release);frame.addEventListener('pointercancel',release);
+  function spawn(){const wide=Math.random()<Math.min(.22+time*.002,.42),r=wide?rand(24,36):rand(13,24),x=rand(r+6,W-r-6);objects.push({type:'hazard',x,y:-r-20,r,spin:rand(-3,3),rot:rand(0,6.28),speed:rand(200,270)+Math.min(time*3.8,280),sides:Math.random()<.5?4:3});}
+  function pickup(){const r=13;objects.push({type:'energy',x:rand(30,W-30),y:-35,r,spin:2.8,rot:0,speed:rand(165,215)+Math.min(time*2,160)})}
+  function update(dt){if(mode!=='playing')return;time+=dt;level=1+Math.floor(time/15);score+=dt*(15+level*3);player.invuln=Math.max(0,player.invuln-dt);shake=Math.max(0,shake-dt*23);flash=Math.max(0,flash-dt*2.4);
+    let dir=Number(keys.has('arrowright')||keys.has('d'))-Number(keys.has('arrowleft')||keys.has('a'));
+    if(pointerX!==null){const diff=pointerX-player.x;dir=clamp(diff/56,-1,1)}
+    const targetVX=dir*385;player.vx+=(targetVX-player.vx)*Math.min(1,dt*13);player.x=clamp(player.x+player.vx*dt,23,W-23);player.tilt+=(player.vx/385*.32-player.tilt)*Math.min(1,dt*11);
+    spawnTimer-=dt;pickupTimer-=dt;
+    if(spawnTimer<=0){spawn();spawnTimer=rand(.36,.64)*Math.max(.47,1-time/160)}
+    if(pickupTimer<=0){pickup();pickupTimer=rand(3.2,5.5)}
+    for(const s of stars){s.y+=s.v*dt*(1+time/95);if(s.y>H){s.y=-5;s.x=rand(0,W)}}
+    for(let i=objects.length-1;i>=0;i--){const o=objects[i];o.y+=o.speed*dt;o.rot+=o.spin*dt;if(o.y-o.r>H+12){objects.splice(i,1);continue}
+      const dx=o.x-player.x,dy=o.y-player.y,hit=dx*dx+dy*dy<(o.r+player.r-5)**2;
+      if(hit&&o.type==='energy'){objects.splice(i,1);score+=175;burst(o.x,o.y,'#ffe789',17,200);tone(900,.12);continue}
+      if(hit&&o.type==='hazard'&&player.invuln<=0){objects.splice(i,1);lives--;player.invuln=1.3;shake=12;flash=.4;burst(player.x,player.y,'#ff569d',23,230);tone(125,.25,'sawtooth',.055);if(lives<=0){mode='over';pauseBtn.textContent='PAUSE';showOverlay('over')}break}
+    }
+    for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;if(p.life<=0){particles.splice(i,1);continue}p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-dt*.9;p.vy*=1-dt*.9}hud()}
+  function polygon(x,y,r,sides,rotation){ctx.beginPath();for(let i=0;i<sides;i++){const a=rotation+i*Math.PI*2/sides;const px=x+Math.cos(a)*r,py=y+Math.sin(a)*r;i?ctx.lineTo(px,py):ctx.moveTo(px,py)}ctx.closePath()}
+  function render(){ctx.save();ctx.clearRect(0,0,W,H);const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#11152e');bg.addColorStop(.6,'#071329');bg.addColorStop(1,'#091022');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    const glow=ctx.createRadialGradient(W/2,H*.63,3,W/2,H*.63,390);glow.addColorStop(0,'#12406e48');glow.addColorStop(1,'#05071100');ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+    ctx.save();ctx.translate(rand(-shake,shake),rand(-shake,shake));
+    for(const s of stars){ctx.globalAlpha=s.alpha;ctx.fillStyle='#cae8ff';ctx.fillRect(s.x,s.y,s.r,s.r*2)}ctx.globalAlpha=1;
+    const horizon=H*.36;ctx.strokeStyle='#47a6f623';ctx.lineWidth=1;for(let i=-10;i<=10;i++){ctx.beginPath();ctx.moveTo(W/2,horizon);ctx.lineTo(W/2+i*88,H);ctx.stroke()}
+    let offset=(time*90)%55;for(let y=horizon+offset;y<H;y+=55){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    ctx.fillStyle='#70ebff12';ctx.fillRect(0,H-115,W,1);
+    for(const o of objects){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.rot);if(o.type==='hazard'){ctx.shadowBlur=20;ctx.shadowColor='#ff3f9b';ctx.strokeStyle='#ff5ba6';ctx.fillStyle='#e51e6f45';ctx.lineWidth=3;polygon(0,0,o.r,o.sides,Math.PI/4);ctx.fill();ctx.stroke();ctx.shadowBlur=0;polygon(0,0,o.r*.56,o.sides,-Math.PI/4);ctx.strokeStyle='#ffa2c677';ctx.lineWidth=1.4;ctx.stroke()}else{ctx.shadowBlur=26;ctx.shadowColor='#ffd35d';ctx.strokeStyle='#ffe58a';ctx.fillStyle='#f7af3d55';ctx.lineWidth=3;polygon(0,0,o.r,4,Math.PI/4);ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#fff6c4';ctx.fillRect(-3,-3,6,6)}ctx.restore()}
+    for(const p of particles){ctx.globalAlpha=clamp(p.life/p.max,0,1);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,p.size,p.size)}ctx.globalAlpha=1;
+    if(mode!=='over'||lives>0){ctx.save();ctx.translate(player.x,player.y);ctx.rotate(player.tilt);if(player.invuln>0&&Math.floor(player.invuln*11)%2===0)ctx.globalAlpha=.4;
+      ctx.shadowBlur=25;ctx.shadowColor='#47f3ff';ctx.fillStyle='#4df1ff';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(22,20);ctx.lineTo(0,11);ctx.lineTo(-22,20);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+      ctx.fillStyle='#0b1434';ctx.beginPath();ctx.moveTo(0,-18);ctx.lineTo(10,12);ctx.lineTo(0,5);ctx.lineTo(-10,12);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#b7fbff';ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(5,2);ctx.lineTo(-5,2);ctx.closePath();ctx.fill();
+      const flicker=4+Math.sin(time*32)*3;ctx.fillStyle='#ff6eae';ctx.shadowColor='#ff5cac';ctx.shadowBlur=14;ctx.beginPath();ctx.moveTo(-7,18);ctx.lineTo(-4,30+flicker);ctx.lineTo(0,17);ctx.lineTo(4,30+flicker);ctx.lineTo(7,18);ctx.fill();ctx.restore()}
+    if(flash>0){ctx.fillStyle=`rgba(255,67,128,${flash*.27})`;ctx.fillRect(0,0,W,H)}
+    ctx.restore();
+    ctx.fillStyle='#95b0df9c';ctx.font='bold 11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillText('WAVE '+String(level).padStart(2,'0'),19,30);ctx.textAlign='right';ctx.fillText(mode==='playing'?'● LIVE':mode==='pause'?'Ⅱ PAUSED':'◆ ARCADE',W-19,30);
+    ctx.restore()}
+  function loop(now){const dt=Math.min((now-last)/1000||0,.033);last=now;update(dt);render();requestAnimationFrame(loop)}
+  showOverlay('ready');requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
