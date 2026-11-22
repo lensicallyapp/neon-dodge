@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#080b18">
   <meta name="description" content="Neon Dodge: a free arcade survival game. Dodge incoming hazards, collect energy, and beat your high score.">
-  <title>NEON DODGE · Arcade Survival</title>
+  <title>NEON DODGE</title>
   <style>
     :root{color-scheme:dark;--cyan:#6bf8ff;--pink:#ff4fa0;--gold:#ffe58a;--ink:#090c1a;--muted:#8795b8}
     *{box-sizing:border-box}html,body{min-height:100%;margin:0}
@@ -13,7 +13,6 @@
     body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:linear-gradient(90deg,transparent 0%,#59e7ff08 50%,transparent 100%),repeating-linear-gradient(0deg,#ffffff08 0px,#ffffff08 1px,transparent 1px,transparent 5px)}
     .app{max-width:840px;margin:auto;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px 14px 24px}
     header{width:min(94vw,480px);display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
-    .eyebrow{font-size:10px;color:var(--cyan);letter-spacing:3px;font-weight:800;line-height:1.6}
     h1{font-family:Impact,Haettenschweiler,'Arial Narrow Bold',sans-serif;letter-spacing:3px;font-size:clamp(32px,8vw,46px);margin:0;line-height:.97;font-weight:900;color:#f9fbff;text-shadow:0 0 30px #5b84ff65}
     h1 span{color:var(--cyan)}
     .top-right{text-align:right;font-size:10px;letter-spacing:2px;color:#96a3c5;padding-bottom:3px;line-height:1.6}
@@ -46,19 +45,20 @@
     .below button:focus-visible,.primary:focus-visible{outline:3px solid #ffe58a;outline-offset:4px}
     footer{font-size:9px;color:#62718e;letter-spacing:2px;text-align:center;margin-top:4px}
     @media(max-height:730px){.app{padding-top:10px;gap:8px}.metric{padding:6px 10px}.metric strong{font-size:16px}.frame{width:min(94vw,440px,calc(69dvh * .667))}.controls{margin-top:10px}}
+    @media(max-width:600px){.app{padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))}.below{margin-top:10px;flex-wrap:wrap;justify-content:center;row-gap:14px}.below>div:first-child{text-align:center;width:100%}.below>div:last-child{display:flex;gap:10px;justify-content:center}.below button{min-height:44px}}
     @media(prefers-reduced-motion:reduce){.overlay,.primary{transition:none}}
   </style>
 </head>
 <body>
 <main class="app">
-  <header><div><div class="eyebrow">ARCADE / 001</div><h1>NEON <span>DODGE</span></h1></div><div class="top-right">SURVIVE THE<br><b>NEON STORM</b></div></header>
+  <header><div><h1>NEON <span>DODGE</span></h1></div><div class="top-right">SURVIVE THE<br><b>NEON STORM</b></div></header>
   <section class="hud" aria-label="Game stats">
     <div class="metric"><label>SCORE</label><strong id="score">00000</strong></div>
     <div class="metric"><label>BEST</label><strong id="best">00000</strong></div>
     <div class="metric"><label>SHIELDS</label><strong id="lives">◆ ◆ ◆</strong></div>
   </section>
   <div class="frame" id="frame">
-    <canvas id="game" width="480" height="720" aria-label="Arcade game: move left and right to dodge incoming hazards and collect glowing stars"></canvas>
+    <canvas id="game" width="480" height="720" aria-label="Move left and right to dodge hazards and collect glowing stars"></canvas>
     <div class="overlay" id="overlay">
       <div class="overlay-inner">
         <div class="overline" id="overlayLabel">READY, PILOT?</div>
@@ -73,7 +73,6 @@
     </div>
   </div>
   <div class="below"><div><span>●</span> GOLD = BONUS &nbsp; <span>●</span> PINK = DANGER</div><div><button id="pauseBtn" type="button">PAUSE</button> <button id="soundBtn" type="button" aria-label="Toggle sound">SOUND OFF</button></div></div>
-  <footer>BUILT FOR THE HIGH SCORE</footer>
 </main>
 <script>
 (()=>{'use strict';
@@ -139,7 +138,7 @@
       const flicker=4+Math.sin(time*32)*3;ctx.fillStyle='#ff6eae';ctx.shadowColor='#ff5cac';ctx.shadowBlur=14;ctx.beginPath();ctx.moveTo(-7,18);ctx.lineTo(-4,30+flicker);ctx.lineTo(0,17);ctx.lineTo(4,30+flicker);ctx.lineTo(7,18);ctx.fill();ctx.restore()}
     if(flash>0){ctx.fillStyle=`rgba(255,67,128,${flash*.27})`;ctx.fillRect(0,0,W,H)}
     ctx.restore();
-    ctx.fillStyle='#95b0df9c';ctx.font='bold 11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillText('WAVE '+String(level).padStart(2,'0'),19,30);ctx.textAlign='right';ctx.fillText(mode==='playing'?'● LIVE':mode==='pause'?'Ⅱ PAUSED':'◆ ARCADE',W-19,30);
+    ctx.fillStyle='#95b0df9c';ctx.font='bold 11px ui-monospace,monospace';ctx.textAlign='left';ctx.fillText('WAVE '+String(level).padStart(2,'0'),19,30);ctx.textAlign='right';ctx.fillText(mode==='playing'?'● LIVE':mode==='pause'?'Ⅱ PAUSED':'',W-19,30);
     ctx.restore()}
   function loop(now){const dt=Math.min((now-last)/1000||0,.033);last=now;update(dt);render();requestAnimationFrame(loop)}
   showOverlay('ready');requestAnimationFrame(loop);
